@@ -96,6 +96,10 @@ char* get_file_history_path()
 
 void write_to_history(char* line)
 {
+	if(line == NULL) {
+		fprintf(stderr, RED "ARGUEMENT TO WRITE TO HISTORY IS NULL" RESET);
+		return;
+	}
 	FILE* file;
 	file = fopen(get_file_history_path(), "a+");
 	fprintf(file, "%s\n", line);
@@ -117,7 +121,7 @@ int tsh_cd(char** args)
 	{
 		perror("tsh");
 	} else {
-		write_to_history(strcat(args[0], args[1]));
+		//write_to_history(strcat(args[0], args[1]));
 	}
 	return 1;
 }
@@ -125,7 +129,7 @@ int tsh_cd(char** args)
 int tsh_execute(char** args)
 {
 	if(args[0] == NULL) return 1;
-	for(int i = 0; i < 9; i++)
+	for(int i = 0; i < num_of_builtins(); i++)
 	{
 		if(strcmp(args[0], builtin_func_strings[i]) == 0)
 		{
@@ -147,7 +151,7 @@ int tsh_launch(char** args)
 	{
 		//this is so that bin executables can be run without typing /bin/(name of exe)
 		char bin_path[6] = "/bin/";
-		if(execvp(strcat(bin_path,args[0]), args) < 0)
+		if(execvp(args[0], args) < 0)
 		{
 			printf("tsh: command not found: %s\n", args[0]);
     	exit(EXIT_FAILURE);
