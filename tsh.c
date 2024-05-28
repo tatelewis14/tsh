@@ -38,7 +38,7 @@ const char* builtin_func_strings[2] =
 
 int num_of_builtins()
 {
-	return 2;
+	return sizeof(builtin_func_strings) / sizeof(char*);
 }
 
 int (*builtin_func[]) (char**) = 
@@ -150,7 +150,6 @@ int tsh_launch(char** args)
 	if(cpid == 0)
 	{
 		//this is so that bin executables can be run without typing /bin/(name of exe)
-		char bin_path[6] = "/bin/";
 		if(execvp(args[0], args) < 0)
 		{
 			printf("tsh: command not found: %s\n", args[0]);
@@ -266,5 +265,6 @@ void loop()
 int main(int argc, char** argv)
 {
 	loop();	
+	printf(CYAN "exited tsh" RESET);
 	return EXIT_SUCCESS; 
 }
