@@ -28,7 +28,8 @@ void write_to_history(char* line);
 int tsh_cd(char** args);
 char** split_line(char* line);
 char* read_line();
-
+int parse_for_piped(char** args);
+int tsh_launch_pipes(char** args);
 
 const char* builtin_func_strings[2] =
 {
@@ -139,7 +140,6 @@ int tsh_execute(char** args)
 	return tsh_launch(args);
 }
 
-
 int tsh_launch(char** args)
 {
 	pid_t cpid;
@@ -165,6 +165,35 @@ int tsh_launch(char** args)
 
 	return 1;
 }
+
+int tsh_launch_piped(char** args)
+{
+	int status = 0;
+
+	int pipefd[2]; 
+
+	pipe(pipefd);
+
+	char** buffer = (char**)malloc(1024 * sizeof(char**));
+	
+	write(pipefd[1], "msg", 3);
+
+	pid_t cpid = fork();
+
+
+	if(cpid == 0)
+	{
+		read(pipefd[0], buffer, 3);
+		printf("got from parent: %s", buffer);
+	} else if (cpid < 0) {
+		printf(RED "Error forking" RESET "\n");	
+	} else {
+		waitpid(cpid, &status, WUNTRACED); 
+	}
+	free(buffer);
+	return 1;	
+}
+
 
 char** split_line(char* line)
 {
@@ -218,6 +247,7 @@ char* read_line()
 		if(c == EOF || c == '\n')
 		{
 			buffer[position] = '\0';
+			parse_for_piped(args);
 			return buffer;
 		} 
 		else 
@@ -236,6 +266,18 @@ char* read_line()
 	} 
 }
 
+int parse_for_piped(char** args)
+{
+	int position = 0;
+	char** before_pipe = (char**)malloc(1024 * sizeof(char**));
+	char** after_pipe = args;
+
+
+	before_pipe = strsep(&args, '|');	
+	printf("before_pipe: %s", &before_pipe);			
+	
+	return 1;
+}
 
 void loop()
 {
